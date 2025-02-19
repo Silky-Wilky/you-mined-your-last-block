@@ -17,7 +17,6 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 
-import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -82,28 +81,34 @@ public class DeathScreenMixin extends Screen {
 	 */
 	@Inject(method = "init", at = @At("HEAD"), cancellable = true)
 	private void init(CallbackInfo ci) {
-		if(modEnabled) {
-			ci.cancel();
+		try {
+			if (modEnabled) {
+				ci.cancel();
 
-			// clear buttons on screen
-			this.buttons.clear();
-			this.buttons.removeAll(buttons);
+				// clear buttons on screen
+				this.buttons.clear();
+				this.buttons.removeAll(buttons);
 
-			// first button (spectate or respawn)
-			this.buttons.add(this.addDrawableChild(ButtonWidget.builder(this.hardcore ? Text.translatable("deathScreen.spectate") : Text.translatable("deathScreen.respawn"), (button) -> {
-				this.client.player.requestRespawn();
-				button.active = false;
-			}).dimensions(this.width / 2 - 100, this.height / 4 + 72, 200, 20).build()));
+				// first button (spectate or respawn)
+				this.buttons.add(this.addDrawableChild(ButtonWidget.builder(this.hardcore ? Text.translatable("deathScreen.spectate") : Text.translatable("deathScreen.respawn"), (button) -> {
+					this.client.player.requestRespawn();
+					button.active = false;
+				}).dimensions(this.width / 2 - 100, this.height / 4 + 72, 200, 20).build()));
 
-			// title screen button
-			this.titleScreenButton = this.addDrawableChild(ButtonWidget.builder(Text.translatable("deathScreen.titleScreen"), (button) -> this.client.getAbuseReportContext().tryShowDraftScreen(this.client, this, this::titleScreenWasClicked, true)).dimensions(this.width / 2 - 100, this.height / 4 + 96, 200, 20).build());
-			this.buttons.add(this.titleScreenButton);
+				// title screen button
+				this.titleScreenButton = this.addDrawableChild(ButtonWidget.builder(Text.translatable("deathScreen.titleScreen"), (button) -> this.client.getAbuseReportContext().tryShowDraftScreen(this.client, this, this::titleScreenWasClicked, true)).dimensions(this.width / 2 - 100, this.height / 4 + 96, 200, 20).build());
+				this.buttons.add(this.titleScreenButton);
 
-			this.setButtonsActive(false);
+				this.setButtonsActive(false);
 
-			this.scoreText = Text.translatable("deathScreen.score.value", Text.literal(Integer.toString(this.client.player.getScore())).formatted(Formatting.YELLOW));
+				this.scoreText = Text.translatable("deathScreen.score.value", Text.literal(Integer.toString(this.client.player.getScore())).formatted(Formatting.YELLOW));
 
-		} else {
+			} else {
+				return;
+			}
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
+			e.printStackTrace();
 			return;
 		}
 	}
@@ -147,6 +152,8 @@ public class DeathScreenMixin extends Screen {
 			if (this.titleScreenButton != null && this.client.getAbuseReportContext().hasDraft()) {
 				context.drawGuiTexture(RenderLayer::getGuiTextured, this.DRAFT_REPORT_ICON_TEXTURE, this.titleScreenButton.getX() + this.titleScreenButton.getWidth() - 17, this.titleScreenButton.getY() + 3, 15, 15);
 			}
+
+			this.setButtonsActive(true);
 
 		} else {
 			return;
@@ -208,7 +215,6 @@ public class DeathScreenMixin extends Screen {
 	 * @param mouseX The x-coordinate of the mouse.
 	 * @return The {@link Style} of the text component under the cursor, or {@code null} if none is found.
 	 */
-	@Nullable
 	private Style getTextComponentUnderMouse(int mouseX) {
 		if (this.deathReasonMessage == null) {
 			return null;
