@@ -33,13 +33,13 @@ public class YouMinedYourLastBlockConfig {
 	 * Whether the mod is enabled.
 	 */
 	@SerialEntry
-	private Boolean modEnabled;
+	private Boolean modEnabled = true;
 
 	/**
 	 * The random number upper bound for generating mined blocks limit.
 	 */
 	@SerialEntry
-	private int blockLimit;
+	private int blockLimit = 1000;
 
 	/**
 	 * Retrieves the singleton instance of the configuration class.
