@@ -1,0 +1,11 @@
+{
+	"required": true,
+	"package": "com.ymylb.mixin.client",
+	"compatibilityLevel": "JAVA_21",
+	"client": [
+		"DeathScreenMixin"
+	],
+	"injectors": {
+		"defaultRequire": 1
+	}
+}
